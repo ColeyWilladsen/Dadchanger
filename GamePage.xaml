@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Dadchanger.GamePage"
+             Title="Game">
+    <VerticalStackLayout Padding="24" Spacing="16">
+        <Label Text="Game"
+               Style="{StaticResource Headline}"
+               HorizontalOptions="Center" />
+        <Label Text="{Binding CurrentGame.StartTime, StringFormat='Date: {0:d}'}"
+               HorizontalOptions="Center" />
+        <Label Text="{Binding OpponentDisplayName}"
+               HorizontalOptions="Center" />
+        <Button Text="Pitching" Command="{Binding PitchingCommand}" />
+        <Button Text="Batting" Command="{Binding BattingCommand}" />
+        <Button Text="End Game" Command="{Binding EndGameCommand}" />
+    </VerticalStackLayout>
+</ContentPage>

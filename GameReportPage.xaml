@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Dadchanger.GameReportPage"
+             Title="Game Report">
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16">
+            <Label Text="Game Report"
+                   Style="{StaticResource Headline}"
+                   HorizontalOptions="Center" />
+            <Label Text="{Binding Game.StartTime, StringFormat='Date: {0:g}'}" />
+            <Label Text="{Binding Game.OpponentName, StringFormat='Opponent: {0}', TargetNullValue='Opponent: Not set'}" />
+
+            <Label Text="Summary" Style="{StaticResource SubHeadline}" />
+            <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto">
+                <Label Text="{Binding InningsPitched, StringFormat='Innings pitched: {0}'}" />
+                <Label Grid.Column="1" Text="{Binding StrikeCount, StringFormat='Strikes: {0}'}" />
+                <Label Grid.Column="2" Text="{Binding BallCount, StringFormat='Balls: {0}'}" />
+                <Label Grid.Row="1" Text="{Binding StrikeoutCount, StringFormat='Strikeouts: {0}'}" />
+                <Label Grid.Row="1" Grid.Column="1" Text="{Binding WalkCount, StringFormat='Walks: {0}'}" />
+                <Label Grid.Row="1" Grid.Column="2" Text="{Binding HitsAllowed, StringFormat='Hits allowed: {0}'}" />
+                <Label Grid.Row="2" Text="{Binding OutCount, StringFormat='Outs: {0}'}" />
+            </Grid>
+
+            <Label Text="Pitching Innings" Style="{StaticResource SubHeadline}" />
+            <CollectionView ItemsSource="{Binding PitchingSummaryItems}"
+                            HeightRequest="220"
+                            SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <Label Text="No pitching innings recorded." Margin="0,8" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="8" ColumnDefinitions="*,*,*,*,*">
+                            <Label Text="{Binding InningNumber, StringFormat='Inning {0}'}" />
+                            <Label Grid.Column="1" Text="{Binding Strikes, StringFormat='Strikes: {0}'}" />
+                            <Label Grid.Column="2" Text="{Binding Balls, StringFormat='Balls: {0}'}" />
+                            <Label Grid.Column="3" Text="{Binding Hits, StringFormat='Hits: {0}'}" />
+                            <Label Grid.Column="4" Text="{Binding Outs, StringFormat='Outs: {0}'}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Text="At Bats" Style="{StaticResource SubHeadline}" />
+            <CollectionView ItemsSource="{Binding BattingSummaryItems}"
+                            HeightRequest="300"
+                            SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <Label Text="No at bats recorded." Margin="0,8" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <VerticalStackLayout Padding="8" Spacing="4">
+                            <Label Text="{Binding AtBatNumber, StringFormat='At bat {0}'}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{Binding Result, StringFormat='Result: {0}'}" />
+                            <Label Text="Events:" FontSize="12" />
+                            <CollectionView ItemsSource="{Binding Events}"
+                                            HeightRequest="100"
+                                            SelectionMode="None">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Label Text="{Binding Type}" FontSize="12" />
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

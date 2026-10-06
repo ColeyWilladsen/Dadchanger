@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Dadchanger.PreviousGamesPage"
+             Title="Previous Games">
+    <VerticalStackLayout Padding="24" Spacing="12">
+        <Label Text="Previous Games"
+               Style="{StaticResource Headline}"
+               HorizontalOptions="Center" />
+        <CollectionView ItemsSource="{Binding Games}"
+                        SelectionMode="Single"
+                        SelectedItem="{Binding SelectedGame, Mode=TwoWay}"
+                        SelectionChangedCommand="{Binding SelectGameCommand}">
+            <CollectionView.EmptyView>
+                <Label Text="No completed games yet."
+                       HorizontalOptions="Center"
+                       Margin="0,24" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="12" ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout>
+                            <Label Text="{Binding OpponentName, StringFormat='Opponent: {0}', TargetNullValue='Opponent: Not set'}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{Binding StartTime, StringFormat='Date: {0:g}'}" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1"
+                               Text="{Binding EndTime, StringFormat='Ended {0:t}'}"
+                               VerticalOptions="Center" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentPage>
