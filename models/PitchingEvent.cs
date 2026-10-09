@@ -5,6 +5,12 @@ public class PitchingEvent
 	public PitchingEventType Type { get; set; }
 
 	public PitchType? PitchType { get; set; }
+
+	public bool CountsAsStrike { get; set; }
+
+	public bool CountsAsOut { get; set; }
+
+	public bool CountsAsWalk { get; set; }
 }
 
 public enum PitchType
@@ -27,5 +33,6 @@ public enum PitchingEventType
 	HitTriple,
 	HitFoulBall,
 	HitOutGround,
-	HitOutFly
+	HitOutFly,
+	HitOutFoul
 }

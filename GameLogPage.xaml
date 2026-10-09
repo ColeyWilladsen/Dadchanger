@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:Dadchanger.Models"
+             x:Class="Dadchanger.GameLogPage"
+             Title="Game Log">
+    <Grid Padding="24"
+          RowDefinitions="Auto,*"
+          RowSpacing="12">
+        <Label Text="Game Log"
+               Style="{StaticResource Headline}"
+               HorizontalOptions="Center" />
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Entries}"
+                        EmptyView="{Binding EmptyMessage}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:GameLogEntry">
+                    <Grid ColumnDefinitions="Auto,*"
+                          RowDefinitions="Auto,Auto"
+                          Padding="8"
+                          ColumnSpacing="12">
+                        <Label Grid.RowSpan="2"
+                               Text="{Binding Timestamp, StringFormat='{0:t}'}"
+                               VerticalOptions="Center" />
+                        <Label Grid.Column="1"
+                               Text="{Binding Description}" />
+                        <Label Grid.Row="1"
+                               Grid.Column="1"
+                               FontSize="12"
+                               Text="{Binding Context}" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

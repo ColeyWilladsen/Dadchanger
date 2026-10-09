@@ -12,7 +12,7 @@
             <Label Text="{Binding Game.OpponentName, StringFormat='Opponent: {0}', TargetNullValue='Opponent: Not set'}" />
 
             <Label Text="Summary" Style="{StaticResource SubHeadline}" />
-            <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto">
+            <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
                 <Label Text="{Binding InningsPitched, StringFormat='Innings pitched: {0}'}" />
                 <Label Grid.Column="1" Text="{Binding StrikeCount, StringFormat='Strikes: {0}'}" />
                 <Label Grid.Column="2" Text="{Binding BallCount, StringFormat='Balls: {0}'}" />
@@ -20,6 +20,22 @@
                 <Label Grid.Row="1" Grid.Column="1" Text="{Binding WalkCount, StringFormat='Walks: {0}'}" />
                 <Label Grid.Row="1" Grid.Column="2" Text="{Binding HitsAllowed, StringFormat='Hits allowed: {0}'}" />
                 <Label Grid.Row="2" Text="{Binding OutCount, StringFormat='Outs: {0}'}" />
+                <Label Grid.Row="2" Grid.Column="1" Text="{Binding EarnedRunsAllowed, StringFormat='Earned runs: {0}'}" />
+                <Label Grid.Row="2" Grid.Column="2" Text="{Binding EarnedRunAverage, StringFormat='ERA: {0}'}" />
+                <Label Grid.Row="3"
+                       Grid.ColumnSpan="3"
+                       Text="Pitch Percentages"
+                       Style="{StaticResource SubHeadline}" />
+                <Label Grid.Row="4" Text="{Binding StrikePercentage, StringFormat='Strikes: {0:F1}%'}" />
+                <Label Grid.Row="4" Grid.Column="1" Text="{Binding BallPercentage, StringFormat='Balls: {0:F1}%'}" />
+                <Label Grid.Row="4" Grid.Column="2" Text="{Binding FirstPitchStrikePercentage, StringFormat='First-pitch strikes: {0:F1}%'}" />
+                <Label Grid.Row="5"
+                       Grid.ColumnSpan="3"
+                       Text="Pitch type usage"
+                       Style="{StaticResource SubHeadline}" />
+                <Label Grid.Row="6" Text="{Binding FastballPercentage, StringFormat='Fastballs: {0:F1}%'}" />
+                <Label Grid.Row="6" Grid.Column="1" Text="{Binding CurveballPercentage, StringFormat='Curveballs: {0:F1}%'}" />
+                <Label Grid.Row="6" Grid.Column="2" Text="{Binding ChangeupPercentage, StringFormat='Changeups: {0:F1}%'}" />
             </Grid>
 
             <Label Text="Pitching Innings" Style="{StaticResource SubHeadline}" />

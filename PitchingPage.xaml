@@ -3,33 +3,67 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Dadchanger.PitchingPage"
              Title="Pitching">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <DataTemplate x:Key="BallDotTemplate">
+                <Ellipse WidthRequest="16"
+                         HeightRequest="16"
+                         Fill="Green" />
+            </DataTemplate>
+            <DataTemplate x:Key="StrikeDotTemplate">
+                <Ellipse WidthRequest="16"
+                         HeightRequest="16"
+                         Fill="Red" />
+            </DataTemplate>
+            <DataTemplate x:Key="OutMarkerTemplate">
+                <Label Text="X"
+                       TextColor="Red"
+                       FontAttributes="Bold"
+                       FontSize="24"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </DataTemplate>
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <ScrollView>
         <StackLayout Padding="24" Spacing="12">
             <Label Text="{Binding CurrentInning.InningNumber, StringFormat='Inning {0}'}"
                    Style="{StaticResource Headline}"
                    HorizontalOptions="Center" />
+            <VerticalStackLayout Spacing="8">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                    <VerticalStackLayout Grid.Column="0" Spacing="6">
+                        <Label Text="{Binding Balls, StringFormat='Balls: {0}'}"
+                               HorizontalOptions="Center" />
+                        <HorizontalStackLayout BindableLayout.ItemsSource="{Binding BallDots}"
+                                               BindableLayout.ItemTemplate="{StaticResource BallDotTemplate}"
+                                               HorizontalOptions="Center"
+                                               Spacing="8" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="6">
+                        <Label Text="{Binding Strikes, StringFormat='Strikes: {0}'}"
+                               HorizontalOptions="Center" />
+                        <HorizontalStackLayout BindableLayout.ItemsSource="{Binding StrikeDots}"
+                                               BindableLayout.ItemTemplate="{StaticResource StrikeDotTemplate}"
+                                               HorizontalOptions="Center"
+                                               Spacing="8" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="2" Spacing="6">
+                        <Label Text="{Binding Outs, StringFormat='Outs: {0}'}"
+                               HorizontalOptions="Center" />
+                        <HorizontalStackLayout BindableLayout.ItemsSource="{Binding OutMarkers}"
+                                               BindableLayout.ItemTemplate="{StaticResource OutMarkerTemplate}"
+                                               HorizontalOptions="Center"
+                                               Spacing="8" />
+                    </VerticalStackLayout>
+                </Grid>
+                <Label Text="{Binding PitchesThrown, StringFormat='Game pitches: {0}'}"
+                       HorizontalOptions="Center" />
+            </VerticalStackLayout>
             <Button Text="Strike" Command="{Binding StrikeCommand}" />
             <Button Text="Ball" Command="{Binding BallCommand}" />
             <Button Text="Hit" Command="{Binding HitCommand}" />
-
-            <StackLayout IsVisible="{Binding ShowPitchTypeOptions}" Spacing="8">
-                <Button Text="Fastball" Command="{Binding FastballCommand}" />
-                <Button Text="Curveball" Command="{Binding CurveballCommand}" />
-                <Button Text="Changeup" Command="{Binding ChangeupCommand}" />
-            </StackLayout>
-
-            <StackLayout IsVisible="{Binding ShowHitResultOptions}" Spacing="8">
-                <Button Text="Single" Command="{Binding SingleCommand}" />
-                <Button Text="Double" Command="{Binding DoubleCommand}" />
-                <Button Text="Triple" Command="{Binding TripleCommand}" />
-                <Button Text="Foulball" Command="{Binding FoulballCommand}" />
-                <Button Text="Out" Command="{Binding OutCommand}" />
-            </StackLayout>
-
-            <StackLayout IsVisible="{Binding ShowOutTypeOptions}" Spacing="8">
-                <Button Text="Ground Out" Command="{Binding GroundOutCommand}" />
-                <Button Text="Fly Out" Command="{Binding FlyOutCommand}" />
-            </StackLayout>
+            <Button Text="Run Scored" Command="{Binding RunScoredCommand}" />
 
             <Button Text="End Inning" Command="{Binding EndInningCommand}" />
         </StackLayout>

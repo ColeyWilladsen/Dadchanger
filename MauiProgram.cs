@@ -23,12 +23,14 @@ public static class MauiProgram
 		builder.Services.AddTransient<AppShell>();
 		builder.Services.AddTransient<MainPage>();
 		builder.Services.AddTransient<PreviousGamesPage>();
+		builder.Services.AddTransient<GameLogPage>();
 		builder.Services.AddTransient<GameReportPage>();
 		builder.Services.AddTransient<GamePage>();
 		builder.Services.AddTransient<PitchingPage>();
 		builder.Services.AddTransient<BattingPage>();
 		builder.Services.AddTransient<MainViewModel>();
 		builder.Services.AddTransient<PreviousGamesViewModel>();
+		builder.Services.AddTransient<GameLogViewModel>();
 		builder.Services.AddTransient<GameReportViewModel>();
 		builder.Services.AddTransient<PitchingViewModel>();
 		builder.Services.AddTransient<BattingViewModel>();

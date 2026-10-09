@@ -22,12 +22,10 @@ public partial class PreviousGamesPage : ContentPage, IQueryAttributable
 
 	public void ApplyQueryAttributes(IDictionary<string, object> query)
 	{
-		if (!query.TryGetValue("context", out var rawContext) ||
-			string.IsNullOrWhiteSpace(rawContext?.ToString()))
-		{
-			throw new ArgumentException("A non-empty context query parameter is required.", nameof(query));
-		}
-
-		_viewModel.LoadContext(rawContext.ToString()!);
+		var context = query.TryGetValue("context", out var rawContext) &&
+			!string.IsNullOrWhiteSpace(rawContext?.ToString())
+				? rawContext.ToString()!
+				: "history";
+		_viewModel.LoadContext(context);
 	}
 }

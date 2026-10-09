@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Dadchanger.MainPage"
-             Title="Dadchanger">
-    <VerticalStackLayout Padding="30" Spacing="20" VerticalOptions="Center">
-        <Label Text="Dadchanger"
-               Style="{StaticResource Headline}"
-               HorizontalOptions="Center" />
-        <Button Text="New Game" Command="{Binding NewGameCommand}" />
-        <Button Text="Previous Games" Command="{Binding PreviousGamesCommand}" />
+             x:Class="Dadchanger.MainPage">
+    <VerticalStackLayout Padding="30,24" Spacing="20" VerticalOptions="Start">
+        <Button Text="{Binding MainActionText}" Command="{Binding NewGameCommand}" />
+        <Button Text="Game Report"
+                Command="{Binding GameReportCommand}"
+                IsVisible="{Binding IsGameReportAvailable}" />
     </VerticalStackLayout>
 </ContentPage>

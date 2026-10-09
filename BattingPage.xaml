@@ -13,26 +13,7 @@
             <Label Text="{Binding Strikes, StringFormat='Strikes: {0}'}"
                    HorizontalOptions="Center" />
             <Button Text="Take" Command="{Binding TakeCommand}" />
-            <VerticalStackLayout IsVisible="{Binding IsTakeChoicesVisible}" Spacing="8">
-                <Button Text="Ball" Command="{Binding TakeBallCommand}" />
-                <Button Text="Strike" Command="{Binding TakeStrikeCommand}" />
-            </VerticalStackLayout>
             <Button Text="Swing" Command="{Binding SwingCommand}" />
-            <VerticalStackLayout IsVisible="{Binding IsSwingChoicesVisible}" Spacing="8">
-                <Button Text="Hit" Command="{Binding SwingHitCommand}" />
-                <Button Text="Miss" Command="{Binding SwingMissCommand}" />
-            </VerticalStackLayout>
-            <VerticalStackLayout IsVisible="{Binding IsHitChoicesVisible}" Spacing="8">
-                <Button Text="Single" Command="{Binding SingleCommand}" />
-                <Button Text="Double" Command="{Binding DoubleCommand}" />
-                <Button Text="Triple" Command="{Binding TripleCommand}" />
-                <Button Text="Foulball" Command="{Binding FoulBallCommand}" />
-                <Button Text="Out" Command="{Binding OutCommand}" />
-            </VerticalStackLayout>
-            <VerticalStackLayout IsVisible="{Binding IsOutChoicesVisible}" Spacing="8">
-                <Button Text="Ground Out" Command="{Binding GroundOutCommand}" />
-                <Button Text="Fly Out" Command="{Binding FlyOutCommand}" />
-            </VerticalStackLayout>
             <Button Text="End At Bat" Command="{Binding EndAtBatCommand}" />
         </VerticalStackLayout>
     </ScrollView>

@@ -3,18 +3,30 @@
     x:Class="Dadchanger.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Dadchanger">
+    Title="Dadchanger"
+    FlyoutBehavior="Flyout">
+
+    <Shell.TitleView>
+        <Label Text="Dadchanger"
+               FontSize="20"
+               FontAttributes="Bold"
+               VerticalTextAlignment="Center" />
+    </Shell.TitleView>
 
     <ShellContent
         x:Name="MainPageContent"
-        Title="Dadchanger"
+        Title="Home"
         Route="mainpage" />
 
     <ShellContent
         x:Name="PreviousGamesPageContent"
         Title="Previous Games"
-        Route="previousgames"
-        Shell.FlyoutItemIsVisible="False" />
+        Route="previousgames" />
+
+    <ShellContent
+        x:Name="GameLogPageContent"
+        Title="Game Log"
+        Route="gamelog" />
 
     <ShellContent
         x:Name="GameReportPageContent"

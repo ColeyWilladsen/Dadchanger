@@ -4,7 +4,7 @@ namespace Dadchanger.Services;
 
 public interface IGameStore
 {
-	Game StartNewGame();
+	Game StartNewGame(string? opponentName = null);
 
 	void EndGame(Game game);
 

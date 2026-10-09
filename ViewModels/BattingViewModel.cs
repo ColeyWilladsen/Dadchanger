@@ -9,10 +9,6 @@ public sealed class BattingViewModel : ViewModelBase
 	private readonly GameViewModel _gameViewModel;
 	private readonly IHapticsService _hapticsService;
 	private AtBat _currentAtBat;
-	private bool _isTakeChoicesVisible;
-	private bool _isSwingChoicesVisible;
-	private bool _isHitChoicesVisible;
-	private bool _isOutChoicesVisible;
 	private bool _atBatCompleted;
 	private int _balls;
 	private int _strikes;
@@ -37,43 +33,8 @@ public sealed class BattingViewModel : ViewModelBase
 		private set => SetProperty(ref _strikes, value);
 	}
 
-	public bool IsTakeChoicesVisible
-	{
-		get => _isTakeChoicesVisible;
-		private set => SetProperty(ref _isTakeChoicesVisible, value);
-	}
-
-	public bool IsSwingChoicesVisible
-	{
-		get => _isSwingChoicesVisible;
-		private set => SetProperty(ref _isSwingChoicesVisible, value);
-	}
-
-	public bool IsHitChoicesVisible
-	{
-		get => _isHitChoicesVisible;
-		private set => SetProperty(ref _isHitChoicesVisible, value);
-	}
-
-	public bool IsOutChoicesVisible
-	{
-		get => _isOutChoicesVisible;
-		private set => SetProperty(ref _isOutChoicesVisible, value);
-	}
-
 	public ICommand TakeCommand { get; }
-	public ICommand TakeBallCommand { get; }
-	public ICommand TakeStrikeCommand { get; }
 	public ICommand SwingCommand { get; }
-	public ICommand SwingHitCommand { get; }
-	public ICommand SwingMissCommand { get; }
-	public ICommand SingleCommand { get; }
-	public ICommand DoubleCommand { get; }
-	public ICommand TripleCommand { get; }
-	public ICommand FoulBallCommand { get; }
-	public ICommand OutCommand { get; }
-	public ICommand GroundOutCommand { get; }
-	public ICommand FlyOutCommand { get; }
 	public ICommand EndAtBatCommand { get; }
 
 	public BattingViewModel(GameViewModel gameViewModel, IHapticsService hapticsService)
@@ -82,25 +43,16 @@ public sealed class BattingViewModel : ViewModelBase
 		_hapticsService = hapticsService;
 		_currentAtBat = CreateOrResumeAtBat();
 
-		TakeCommand = new RelayCommand(() => { _hapticsService.Tap(); SetChoiceMode(take: true); });
-		TakeBallCommand = new AsyncRelayCommand(async () => { _hapticsService.Tap(); await RecordTakeAsync(BattingEventType.TakeBall); });
-		TakeStrikeCommand = new AsyncRelayCommand(async () => { _hapticsService.Tap(); await RecordTakeAsync(BattingEventType.TakeStrike); });
-		SwingCommand = new RelayCommand(() => { _hapticsService.Tap(); SetChoiceMode(take: false); });
-		SwingHitCommand = new RelayCommand(() => { _hapticsService.Tap(); IsHitChoicesVisible = true; });
-		SwingMissCommand = new AsyncRelayCommand(async () => { _hapticsService.Tap(); await RecordSwingMissAsync(); });
-		SingleCommand = new AsyncRelayCommand(async () => { _hapticsService.Tap(); await RecordHitAsync(BattingEventType.SwingHitSingle, "Single"); });
-		DoubleCommand = new AsyncRelayCommand(async () => { _hapticsService.Tap(); await RecordHitAsync(BattingEventType.SwingHitDouble, "Double"); });
-		TripleCommand = new AsyncRelayCommand(async () => { _hapticsService.Tap(); await RecordHitAsync(BattingEventType.SwingHitTriple, "Triple"); });
-		FoulBallCommand = new RelayCommand(() => { _hapticsService.Tap(); RecordFoulBall(); });
-		OutCommand = new RelayCommand(() =>
+		TakeCommand = new AsyncRelayCommand(SelectTakeResultAsync);
+		SwingCommand = new AsyncRelayCommand(SelectSwingResultAsync);
+		EndAtBatCommand = new AsyncRelayCommand(async () =>
 		{
 			_hapticsService.Tap();
-			IsHitChoicesVisible = false;
-			IsOutChoicesVisible = true;
+			_gameViewModel.AddGameLogEntry(
+				"Batter recorded as out (at bat ended manually)",
+				atBatNumber: CurrentAtBat.AtBatNumber);
+			await FinishAtBatAsync("Out");
 		});
-		GroundOutCommand = new AsyncRelayCommand(async () => { _hapticsService.Tap(); await RecordHitAsync(BattingEventType.SwingHitOutGround, "GroundOut"); });
-		FlyOutCommand = new AsyncRelayCommand(async () => { _hapticsService.Tap(); await RecordHitAsync(BattingEventType.SwingHitOutFly, "FlyOut"); });
-		EndAtBatCommand = new AsyncRelayCommand(async () => { _hapticsService.Tap(); await FinishAtBatAsync("Out"); });
 		UpdateCountFromEvents();
 	}
 
@@ -113,7 +65,6 @@ public sealed class BattingViewModel : ViewModelBase
 			CurrentAtBat = CreateOrResumeAtBat(_requestedAtBatNumber);
 			_atBatCompleted = false;
 			UpdateCountFromEvents();
-			SetChoiceMode(take: false);
 			return;
 		}
 
@@ -124,7 +75,6 @@ public sealed class BattingViewModel : ViewModelBase
 			Strikes = 0;
 			_atBatCompleted = false;
 			_requestedAtBatNumber = CurrentAtBat.AtBatNumber;
-			SetChoiceMode(take: false);
 		}
 	}
 
@@ -140,12 +90,7 @@ public sealed class BattingViewModel : ViewModelBase
 		CurrentAtBat = GetOrCreateAtBat(atBatNumber);
 		_atBatCompleted = false;
 		UpdateCountFromEvents();
-		SetChoiceMode(take: false);
 	}
-
-	public void Take() => SetChoiceMode(take: true);
-
-	public void Swing() => SetChoiceMode(take: false);
 
 	public Task EndAtBat() => FinishAtBatAsync("Out");
 
@@ -198,12 +143,109 @@ public sealed class BattingViewModel : ViewModelBase
 		return atBat;
 	}
 
-	private void SetChoiceMode(bool take)
+	private async Task SelectTakeResultAsync()
 	{
-		IsTakeChoicesVisible = take;
-		IsSwingChoicesVisible = !take;
-		IsHitChoicesVisible = false;
-		IsOutChoicesVisible = false;
+		_hapticsService.Tap();
+		var result = await Shell.Current.DisplayActionSheetAsync(
+			"Take",
+			"Cancel",
+			null,
+			"Ball",
+			"Strike");
+
+		switch (result)
+		{
+			case "Ball":
+				_hapticsService.Tap();
+				await RecordTakeAsync(BattingEventType.TakeBall);
+				break;
+			case "Strike":
+				_hapticsService.Tap();
+				await RecordTakeAsync(BattingEventType.TakeStrike);
+				break;
+		}
+	}
+
+	private async Task SelectSwingResultAsync()
+	{
+		_hapticsService.Tap();
+		var result = await Shell.Current.DisplayActionSheetAsync(
+			"Swing",
+			"Cancel",
+			null,
+			"Hit",
+			"Miss");
+
+		switch (result)
+		{
+			case "Hit":
+				_hapticsService.Tap();
+				await SelectHitResultAsync();
+				break;
+			case "Miss":
+				_hapticsService.Tap();
+				await RecordSwingMissAsync();
+				break;
+		}
+	}
+
+	private async Task SelectHitResultAsync()
+	{
+		var result = await Shell.Current.DisplayActionSheetAsync(
+			"Select hit result",
+			"Cancel",
+			null,
+			"Single",
+			"Double",
+			"Triple",
+			"Foulball",
+			"Out");
+
+		switch (result)
+		{
+			case "Single":
+				_hapticsService.Tap();
+				await RecordHitAsync(BattingEventType.SwingHitSingle, "Single");
+				break;
+			case "Double":
+				_hapticsService.Tap();
+				await RecordHitAsync(BattingEventType.SwingHitDouble, "Double");
+				break;
+			case "Triple":
+				_hapticsService.Tap();
+				await RecordHitAsync(BattingEventType.SwingHitTriple, "Triple");
+				break;
+			case "Foulball":
+				_hapticsService.Tap();
+				RecordFoulBall();
+				break;
+			case "Out":
+				_hapticsService.Tap();
+				await SelectOutTypeAsync();
+				break;
+		}
+	}
+
+	private async Task SelectOutTypeAsync()
+	{
+		var result = await Shell.Current.DisplayActionSheetAsync(
+			"Select out type",
+			"Cancel",
+			null,
+			"Ground Out",
+			"Fly Out");
+
+		switch (result)
+		{
+			case "Ground Out":
+				_hapticsService.Tap();
+				await RecordHitAsync(BattingEventType.SwingHitOutGround, "GroundOut");
+				break;
+			case "Fly Out":
+				_hapticsService.Tap();
+				await RecordHitAsync(BattingEventType.SwingHitOutFly, "FlyOut");
+				break;
+		}
 	}
 
 	private async Task RecordTakeAsync(BattingEventType type)
@@ -212,6 +254,7 @@ public sealed class BattingViewModel : ViewModelBase
 		if (type == BattingEventType.TakeBall)
 		{
 			Balls++;
+			LogBattingEvent($"Batter took ball {Balls}" + (Balls == 4 ? " (walk)" : string.Empty));
 			if (Balls == 4)
 			{
 				CurrentAtBat.IsWalk = true;
@@ -222,6 +265,7 @@ public sealed class BattingViewModel : ViewModelBase
 		else
 		{
 			Strikes++;
+			LogBattingEvent($"Batter took strike {Strikes}" + (Strikes == 3 ? " (strikeout)" : string.Empty));
 			if (Strikes == 3)
 			{
 				await FinishStrikeoutAsync();
@@ -230,13 +274,14 @@ public sealed class BattingViewModel : ViewModelBase
 		}
 
 		SaveProgress();
-		SetChoiceMode(take: false);
 	}
 
 	private async Task RecordSwingMissAsync()
 	{
 		CurrentAtBat.Events.Add(new BattingEvent { Type = BattingEventType.SwingMiss });
 		Strikes++;
+		LogBattingEvent($"Batter swung and missed (strike {Strikes}" +
+			(Strikes == 3 ? "; strikeout)" : ")"));
 		if (Strikes == 3)
 		{
 			await FinishStrikeoutAsync();
@@ -244,25 +289,37 @@ public sealed class BattingViewModel : ViewModelBase
 		}
 
 		SaveProgress();
-		SetChoiceMode(take: false);
 	}
 
 	private Task RecordHitAsync(BattingEventType type, string result)
 	{
 		CurrentAtBat.Events.Add(new BattingEvent { Type = type });
+		var description = type switch
+		{
+			BattingEventType.SwingHitSingle => "Batter hit a single",
+			BattingEventType.SwingHitDouble => "Batter hit a double",
+			BattingEventType.SwingHitTriple => "Batter hit a triple",
+			BattingEventType.SwingHitOutGround => "Batter hit a ground out",
+			BattingEventType.SwingHitOutFly => "Batter hit a fly out",
+			_ => throw new ArgumentOutOfRangeException(nameof(type))
+		};
+		LogBattingEvent(description);
 		return FinishAtBatAsync(result);
 	}
 
 	private void RecordFoulBall()
 	{
 		CurrentAtBat.Events.Add(new BattingEvent { Type = BattingEventType.SwingHitOutFoul });
-		if (Strikes < 2)
+		var countsAsStrike = Strikes < 2;
+		if (countsAsStrike)
 		{
 			Strikes++;
 		}
 
+		LogBattingEvent(countsAsStrike
+			? $"Batter hit a foul ball (strike {Strikes})"
+			: $"Batter hit a foul ball (strike count remains {Strikes})");
 		SaveProgress();
-		SetChoiceMode(take: false);
 	}
 
 	private Task FinishStrikeoutAsync()
@@ -277,10 +334,6 @@ public sealed class BattingViewModel : ViewModelBase
 		CurrentAtBat.Result = result;
 		_gameViewModel.SaveCurrentGame();
 		_atBatCompleted = true;
-		IsTakeChoicesVisible = false;
-		IsSwingChoicesVisible = false;
-		IsHitChoicesVisible = false;
-		IsOutChoicesVisible = false;
 		await Shell.Current.GoToAsync(
 			AppShell.GameRoute,
 			new Dictionary<string, object>
@@ -294,6 +347,11 @@ public sealed class BattingViewModel : ViewModelBase
 	private void SaveProgress()
 	{
 		_gameViewModel.SaveCurrentGame();
+	}
+
+	private void LogBattingEvent(string description)
+	{
+		_gameViewModel.AddGameLogEntry(description, atBatNumber: CurrentAtBat.AtBatNumber);
 	}
 
 	private void UpdateCountFromEvents()

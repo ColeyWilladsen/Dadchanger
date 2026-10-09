@@ -10,6 +10,7 @@ public sealed class GameViewModel : ViewModelBase
 	private readonly IHapticsService _hapticsService;
 	private Game? _currentGame;
 	private string _context = string.Empty;
+	private int? _upcomingInningNumber;
 
 	public Game? CurrentGame
 	{
@@ -19,6 +20,8 @@ public sealed class GameViewModel : ViewModelBase
 			if (SetProperty(ref _currentGame, value))
 			{
 				OnPropertyChanged(nameof(OpponentDisplayName));
+				OnPropertyChanged(nameof(WalkCount));
+				OnPropertyChanged(nameof(StrikeoutCount));
 			}
 		}
 	}
@@ -26,6 +29,10 @@ public sealed class GameViewModel : ViewModelBase
 	public string OpponentDisplayName => string.IsNullOrWhiteSpace(CurrentGame?.OpponentName)
 		? "Opponent: Not set"
 		: $"Opponent: {CurrentGame.OpponentName}";
+
+	public int WalkCount => CurrentGame?.CountWalks() ?? 0;
+
+	public int StrikeoutCount => CurrentGame?.CountStrikeouts() ?? 0;
 
 	public string Context
 	{
@@ -48,7 +55,8 @@ public sealed class GameViewModel : ViewModelBase
 		get
 		{
 			var game = RequireCurrentGame();
-			return game.PitchingInnings.LastOrDefault()?.InningNumber ?? 1;
+			var latestInningNumber = game.PitchingInnings.LastOrDefault()?.InningNumber ?? 1;
+			return Math.Max(latestInningNumber, Math.Max(game.ActiveInningNumber, _upcomingInningNumber ?? 1));
 		}
 	}
 
@@ -67,6 +75,13 @@ public sealed class GameViewModel : ViewModelBase
 	{
 		_gameStore = gameStore;
 		_hapticsService = hapticsService;
+		CurrentGame = _gameStore.GetGames().LastOrDefault(game => game.EndTime == default);
+		if (CurrentGame is not null)
+		{
+			Context = "live";
+			_upcomingInningNumber = CurrentGame.ActiveInningNumber;
+		}
+
 		GoToPitchingCommand = new AsyncRelayCommand(async () =>
 		{
 			_hapticsService.Tap();
@@ -90,9 +105,10 @@ public sealed class GameViewModel : ViewModelBase
 		});
 	}
 
-	public Game StartNewGame()
+	public Game StartNewGame(string? opponentName = null)
 	{
-		var game = _gameStore.StartNewGame();
+		var game = _gameStore.StartNewGame(opponentName);
+		_upcomingInningNumber = null;
 		CurrentGame = game;
 		Context = "new";
 		return game;
@@ -100,9 +116,27 @@ public sealed class GameViewModel : ViewModelBase
 
 	public void LoadGame(Guid gameId, string context)
 	{
+		if (CurrentGame?.Id != gameId)
+		{
+			_upcomingInningNumber = null;
+		}
+
 		CurrentGame = _gameStore.GetGameById(gameId)
 			?? throw new KeyNotFoundException($"No game with id '{gameId}' exists in the game store.");
 		Context = context;
+	}
+
+	public void SetUpcomingInningNumber(int inningNumber)
+	{
+		if (inningNumber < 1)
+		{
+			throw new ArgumentOutOfRangeException(nameof(inningNumber), "Inning number must be positive.");
+		}
+
+		_upcomingInningNumber = inningNumber;
+		var game = RequireCurrentGame();
+		game.ActiveInningNumber = inningNumber;
+		SaveCurrentGame();
 	}
 
 	public Game RequireCurrentGame()
@@ -115,13 +149,32 @@ public sealed class GameViewModel : ViewModelBase
 		if (CurrentGame is { } game)
 		{
 			_gameStore.UpdateGame(game);
+			OnPropertyChanged(nameof(WalkCount));
+			OnPropertyChanged(nameof(StrikeoutCount));
 		}
+	}
+
+	public void AddGameLogEntry(
+		string description,
+		int? inningNumber = null,
+		int? atBatNumber = null)
+	{
+		var game = RequireCurrentGame();
+		game.GameLogEntries.Add(new GameLogEntry
+		{
+			Timestamp = DateTime.Now,
+			InningNumber = inningNumber,
+			AtBatNumber = atBatNumber,
+			Description = description
+		});
+		SaveCurrentGame();
 	}
 
 	private async Task EndGameAsync()
 	{
 		var game = RequireCurrentGame();
 		_gameStore.EndGame(game);
+		OnPropertyChanged(nameof(CurrentGame));
 		await Shell.Current.GoToAsync(
 			AppShell.GameReportRoute,
 			new Dictionary<string, object>
