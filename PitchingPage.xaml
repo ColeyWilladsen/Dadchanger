@@ -64,6 +64,7 @@
             <Button Text="Ball" Command="{Binding BallCommand}" />
             <Button Text="Hit" Command="{Binding HitCommand}" />
             <Button Text="Run Scored" Command="{Binding RunScoredCommand}" />
+            <Button Text="Record Out" Command="{Binding RecordOutCommand}" />
 
             <Button Text="End Inning" Command="{Binding EndInningCommand}" />
         </StackLayout>

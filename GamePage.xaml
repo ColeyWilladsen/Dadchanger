@@ -10,14 +10,7 @@
         <Label Text="{Binding CurrentGame.StartTime, StringFormat='Date: {0:d}'}"
                HorizontalOptions="Center" />
         <Label Text="{Binding OpponentDisplayName}"
-               HorizontalOptions="Center" />
-        <Grid ColumnDefinitions="*,*">
-            <Label Text="{Binding StrikeoutCount, StringFormat='Strikeouts: {0}'}"
-                   HorizontalOptions="Center" />
-            <Label Grid.Column="1"
-                   Text="{Binding WalkCount, StringFormat='Walks: {0}'}"
-                   HorizontalOptions="Center" />
-        </Grid>
+               HorizontalOptions="Center" />        
         <Button Text="Pitching" Command="{Binding PitchingCommand}" />
         <Button Text="Batting" Command="{Binding BattingCommand}" />
         <Button Text="End Game" Command="{Binding EndGameCommand}" />

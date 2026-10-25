@@ -15,7 +15,23 @@ public partial class GameReportPage : ContentPage, IQueryAttributable
 
 	public void ApplyQueryAttributes(IDictionary<string, object> query)
 	{
+		if (!query.ContainsKey("gameId") && !query.ContainsKey("context"))
+		{
+			if (!_viewModel.LoadLatestGame())
+			{
+				_ = ShowNoGamesMessageAsync();
+			}
+
+			return;
+		}
+
 		var (gameId, context) = GameNavigationQuery.Read(query);
 		_viewModel.LoadGame(gameId, context);
+	}
+
+	private async Task ShowNoGamesMessageAsync()
+	{
+		await DisplayAlertAsync("No game reports", "Record a game before opening a report.", "OK");
+		await Shell.Current.GoToAsync(AppShell.MainRoute);
 	}
 }

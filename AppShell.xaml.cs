@@ -41,17 +41,19 @@ public partial class AppShell : Shell
 			return true;
 		}
 
+		if (_currentSnapshot?.Route == "mainpage")
+		{
+			Application.Current?.Quit();
+			return true;
+		}
+
 		if (_navigationHistory.TryPop(out var previous))
 		{
 			_ = NavigateBackAsync(previous);
 			return true;
 		}
 
-		if (_currentSnapshot?.Route != "mainpage")
-		{
-			_ = NavigateBackAsync(new RouteSnapshot("mainpage"));
-		}
-
+		_ = NavigateBackAsync(new RouteSnapshot("mainpage"));
 		return true;
 	}
 

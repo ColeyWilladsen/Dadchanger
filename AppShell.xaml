@@ -31,8 +31,7 @@
     <ShellContent
         x:Name="GameReportPageContent"
         Title="Game Report"
-        Route="gamereport"
-        Shell.FlyoutItemIsVisible="False" />
+        Route="gamereport" />
 
     <ShellContent
         x:Name="GamePageContent"

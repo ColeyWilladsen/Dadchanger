@@ -5,7 +5,7 @@
        stroke-width="8"
        stroke-linecap="round"
        stroke-linejoin="round"
-       transform="translate(38 188)">
+       transform="translate(91 199) scale(0.72)">
         <path d="M0 0 V62 H13 C31 62 39 49 39 31 S31 0 13 0 Z"/>
         <path d="M48 24 C54 16 71 17 72 28 V62 M72 43 C67 37 49 38 48 50 C47 63 66 67 72 55"/>
         <path d="M108 0 V62 M108 25 C102 17 86 17 81 29 C75 44 81 61 95 62 C101 62 105 58 108 54"/>

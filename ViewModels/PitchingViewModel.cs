@@ -38,6 +38,7 @@ public sealed class PitchingViewModel : ViewModelBase
 	public ICommand BallCommand { get; }
 	public ICommand HitCommand { get; }
 	public ICommand RunScoredCommand { get; }
+	public ICommand RecordOutCommand { get; }
 	public ICommand EndInningCommand { get; }
 
 	public PitchingViewModel(GameViewModel gameViewModel, IHapticsService hapticsService)
@@ -50,6 +51,7 @@ public sealed class PitchingViewModel : ViewModelBase
 		BallCommand = new AsyncRelayCommand(() => SelectPitchAsync(PitchAction.Ball));
 		HitCommand = new AsyncRelayCommand(() => SelectPitchAsync(PitchAction.Hit));
 		RunScoredCommand = new AsyncRelayCommand(RecordRunScoredAsync);
+		RecordOutCommand = new AsyncRelayCommand(RecordOutAsync);
 		EndInningCommand = new AsyncRelayCommand(async () =>
 		{
 			_hapticsService.Tap();
@@ -178,6 +180,8 @@ public sealed class PitchingViewModel : ViewModelBase
 		var nextInningNumber = CurrentInning.Events.Count > 0 || CurrentInning.EarnedRuns > 0
 			? CurrentInning.InningNumber + 1
 			: CurrentInning.InningNumber;
+		game.CurrentBalls = 0;
+		game.CurrentStrikes = 0;
 		_gameViewModel.SetUpcomingInningNumber(nextInningNumber);
 		_requestedInningNumber = nextInningNumber;
 		CurrentInning = GetOrCreateCurrentInning(nextInningNumber);
@@ -253,10 +257,7 @@ public sealed class PitchingViewModel : ViewModelBase
 		var game = _gameViewModel.RequireCurrentGame();
 		EnsureCurrentInningIsRecorded(game);
 
-		var countsAsStrike = type is
-			PitchingEventType.StrikeFastball or
-			PitchingEventType.StrikeCurveball or
-			PitchingEventType.StrikeChangeup;
+		var countsAsStrike = false;	
 		var countsAsWalk = false;
 		var countsAsOut = type is
 			PitchingEventType.HitOutFoul or
@@ -264,19 +265,8 @@ public sealed class PitchingViewModel : ViewModelBase
 			PitchingEventType.HitOutFly;
 		var strikeNumber = 0;
 		var ballNumber = 0;
-
-		if (countsAsStrike)
-		{
-			game.CurrentStrikes++;
-			strikeNumber = game.CurrentStrikes;
-			if (game.CurrentStrikes == 3)
-			{
-				countsAsOut = true;
-				game.CurrentBalls = 0;
-				game.CurrentStrikes = 0;
-			}
-		}
-		else if (type is
+		
+		if (type is
 			PitchingEventType.BallFastball or
 			PitchingEventType.BallCurveball or
 			PitchingEventType.BallChangeup)
@@ -308,7 +298,19 @@ public sealed class PitchingViewModel : ViewModelBase
 			game.CurrentBalls = 0;
 			game.CurrentStrikes = 0;
 		}
-
+		else
+		{
+			countsAsStrike = true;
+			game.CurrentStrikes++;
+			strikeNumber = game.CurrentStrikes;
+			if (game.CurrentStrikes == 3)
+			{
+				countsAsOut = true;
+				game.CurrentBalls = 0;
+				game.CurrentStrikes = 0;
+			}
+		}
+		
 		var pitchingEvent = new PitchingEvent
 		{
 			Type = type,
@@ -336,6 +338,25 @@ public sealed class PitchingViewModel : ViewModelBase
 		CurrentInning.EarnedRuns++;
 		_gameViewModel.AddGameLogEntry(
 			"Run scored (earned run)",
+			inningNumber: CurrentInning.InningNumber);
+		return Task.CompletedTask;
+	}
+
+	private Task RecordOutAsync()
+	{
+		_hapticsService.Tap();
+		var game = _gameViewModel.RequireCurrentGame();
+		EnsureCurrentInningIsRecorded(game);
+
+		var countsAsOut = true;
+
+		var pitchingEvent = new PitchingEvent
+		{
+			CountsAsOut = countsAsOut
+		};
+		CurrentInning.Events.Add(pitchingEvent);
+		_gameViewModel.AddGameLogEntry(
+			"Out recorded (out)",
 			inningNumber: CurrentInning.InningNumber);
 		return Task.CompletedTask;
 	}

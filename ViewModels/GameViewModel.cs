@@ -20,8 +20,6 @@ public sealed class GameViewModel : ViewModelBase
 			if (SetProperty(ref _currentGame, value))
 			{
 				OnPropertyChanged(nameof(OpponentDisplayName));
-				OnPropertyChanged(nameof(WalkCount));
-				OnPropertyChanged(nameof(StrikeoutCount));
 			}
 		}
 	}
